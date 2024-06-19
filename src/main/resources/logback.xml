@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <layout class="ch.qos.logback.classic.PatternLayout">
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - SOURCE="%X{source.system}" EVENT="%X{event.id}" - ENV="%X{kj.env}" %msg%n</pattern>
+    </layout>
+  </appender>
+
+  <appender name="WebUI" class="no.helse.kj.devepj.logging.LogbackWebLogAppender"></appender>
+
+  <root>
+    <level value="info"/>
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="WebUI"/>
+  </root>
+
+
+  <logger name="no.helse.kj" level="debug" additivity="false">
+    <appender-ref ref="STDOUT"/>
+    <appender-ref ref="WebUI"/>
+  </logger>
+
+</configuration>

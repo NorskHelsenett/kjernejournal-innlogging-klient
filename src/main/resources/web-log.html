@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Logs</title>
+    <style>
+      h1 {
+        font-family: monospace;
+      }
+      code {
+        display: block;
+        white-space: pre-wrap;
+
+        border: transparent;
+        border-radius: 5px;
+        padding: 0.5em;
+
+        background-color: #232323;
+        color: #ababab;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Logs</h1>
+    <code id="code-view"></code>
+    <script>
+      const evtSource = new EventSource(window.location.pathname + "/source");
+      const code = document.getElementById("code-view");
+
+      const appendEvent = (event) => {
+        const data = event.data || "";
+        data.split("\\n").forEach((line) => {
+          code.innerText += line + "\n";
+        });
+      };
+      evtSource.addEventListener("log", (event) => appendEvent(event));
+      evtSource.addEventListener("error", (event) => appendEvent(event));
+    </script>
+  </body>
+</html>
