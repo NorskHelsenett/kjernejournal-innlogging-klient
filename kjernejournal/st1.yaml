@@ -1,0 +1,5 @@
+id: "ST1"
+name: "Systest 1"
+webUri: "https://st1.kjernejournal-test.no/hpp-webapp"
+statusApiUri: "https://api.st1.kjernejournal-test.no:8000/v1/helseindikator/status"
+innloggingApiUri: "https://innlogging.st1.kjernejournal-test.no"
