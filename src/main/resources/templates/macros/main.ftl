@@ -45,11 +45,11 @@
             <#if virksomhet?has_content>
                 <div class="mt-2 px-4 py-2 flex-1 rounded-md bg-[#dadada] text-bold grid grid-cols-[max-content_1fr] gap-x-4">
                     <#if virksomhet?has_content>
-                        <div class="w-4">Virksomhet:</div>
+                        <div>Virksomhet:</div>
                         <div>${virksomhet}</div>
                     </#if>
                     <#if bruker?has_content>
-                        <div class="w-4">Bruker:</div>
+                        <div>Bruker:</div>
                         <div>${bruker}</div>
                     </#if>
                     <#if autorisasjon?has_content>

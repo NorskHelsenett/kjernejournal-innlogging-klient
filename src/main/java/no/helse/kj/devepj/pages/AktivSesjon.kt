@@ -3,20 +3,16 @@ package no.helse.kj.devepj.pages
 import arrow.core.flatMap
 import io.javalin.Javalin
 import io.javalin.http.Context
+import no.helse.kj.devepj.dto.getHprAutorisasjonFromContext
+import no.helse.kj.devepj.dto.getUserPidFromContext
 import no.helse.kj.devepj.helseid.HelseIdClient
 import no.helse.kj.devepj.helseid.getHelseIdConfigurationFromContext
 import no.helse.kj.devepj.helseid.getHelseIdTokensFromContext
 import no.helse.kj.devepj.helseid.hentTokensMedRefreshTokenGrant
-import no.helse.kj.devepj.kjinnlogging.KJERNEJOURNAL_SESSION_REFERENCE_SESSION_KEY
-import no.helse.kj.devepj.kjinnlogging.KjernejournalSessionReference
-import no.helse.kj.devepj.kjinnlogging.endKjernejournalSessionWithContext
-import no.helse.kj.devepj.kjinnlogging.getKjernejournalSatusWithContext
-import no.helse.kj.devepj.kjinnlogging.getKjernejournalSessionReferenceFromContext
-import no.helse.kj.devepj.kjinnlogging.refreshSession
+import no.helse.kj.devepj.kjinnlogging.*
 import no.helse.kj.devepj.logging.logToEventStore
-import no.helse.kj.devepj.dto.getHprAutorisasjonFromContext
-import no.helse.kj.devepj.dto.getUserPidFromContext
-import no.helse.kj.devepj.kjinnlogging.KjernejournalConfiguration
+
+private const val TIDSMARGIN = 0.8
 
 object AktivSesjon {
   fun register(app: Javalin) {
@@ -49,13 +45,16 @@ object AktivSesjon {
             .flatMap { sessionReference -> refreshSession(config, sessionReference, tokens.accessToken) }
         }
     }
-      .onLeft { visError(ctx, it, "Hold sesjon") }
+      .onLeft { feil ->
+        logToEventStore(ctx, "Kunne ikke holde innloggingsesjon i live: $feil")
+        ctx.json(feil)
+      }
       .onRight { lifetime ->
         logToEventStore(ctx, "Holder Kjernejournal innloggingsesjon i live")
         ctx.json(
           mapOf(
             Pair("status", "ok"),
-            Pair("levetid", lifetime)
+            Pair("levetid", lifetime * TIDSMARGIN)
           )
         )
       }

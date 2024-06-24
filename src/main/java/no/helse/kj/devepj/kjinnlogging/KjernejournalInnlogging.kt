@@ -162,17 +162,6 @@ fun createKjernejournalSession(
   }
 }
 
-fun refreshKjernejournalSessionWithContext(
-  ctx: Context,
-  tokens: HelseIdTokenBundle,
-): Either<EpjError, Long> {
-  return KjernejournalConfiguration.fromContext(ctx).flatMap { config ->
-    getKjernejournalSessionReferenceFromContext(ctx).flatMap { sessionRef ->
-      refreshSession(config, sessionRef, tokens.accessToken)
-    }
-  }
-}
-
 fun refreshSession(
   configuration: KjernejournalConfiguration,
   kjernejournalSessionReference: KjernejournalSessionReference,
@@ -180,7 +169,7 @@ fun refreshSession(
 ): Either<EpjError, Long> {
   try {
     val refreshUri = URI.create("${configuration.innloggingApiUri}/api/session/refresh")
-    val dpopProof = createDPoPProof(HttpMethod.POST, refreshUri)
+    val dpopProof = createDPoPProof(HttpMethod.POST, refreshUri, token)
     val response: HttpResponse<String> = client.send(
       HttpRequest.newBuilder()
         .uri(refreshUri)
@@ -259,7 +248,7 @@ fun getKjernejournalSatusWithContext(
       config,
       patientId,
       tokens.accessToken
-    )
+    ).right()
   }
 }
 
@@ -273,8 +262,7 @@ fun getKjernejournalStatus(
   configuration: KjernejournalConfiguration,
   patientId: String,
   token: AccessToken,
-): Either<EpjError, Int> {
-  try {
+): Int = runCatching {
     val response: HttpResponse<String> = client.send(
       HttpRequest.newBuilder()
         .uri(configuration.statusApiUri)
@@ -295,7 +283,7 @@ fun getKjernejournalStatus(
         response.statusCode(),
         response.body()
       )
-      return HELSEINDIKATOR_FEILSTATUS.right() // 0 er feilkode
+      return HELSEINDIKATOR_FEILSTATUS // 0 er feilkode
     }
 
     val helseindikatorResponse: HelseIndikatorResponse =
@@ -303,11 +291,12 @@ fun getKjernejournalStatus(
 
     val status: Int = helseindikatorResponse.status
     return if (status > 4) {
-      EpjError("Henting av helseindikator", 500, "Mottok for høy statuskode ${status}").left()
+      log.error { "Fikk for høy statuskode: $status" }
+      HELSEINDIKATOR_FEILSTATUS
     } else {
-      status.right()
+      status
     }
-  } catch (e: Exception) {
-    return EpjError("Intern feil ved henting av helseindikator", 500, e.message, e).left()
+  }.getOrElse {
+      e -> log.error(e) { "Intern feil ved henting av helseindikator"  }
+    HELSEINDIKATOR_FEILSTATUS
   }
-}

@@ -38,7 +38,7 @@ fun visError(
       Pair("kilde", kilde),
       Pair("status", error.status),
       Pair("kontekst", error.context),
-      Pair("melding", error.message),
+      Pair("melding", error.message ?: ""),
       Pair("stacktrace", error.cause?.stackTrace
         ?.map { obj: StackTraceElement -> obj.toString() }
         ?.joinToString("\n") ?: ""

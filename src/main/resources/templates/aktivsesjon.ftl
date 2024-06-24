@@ -31,13 +31,12 @@ actions=[{"text": "Logg ut", "href":"/sesjon/loggut"}] events="true">
 
         const holdSesjon = async () => {
             const response = await fetch("/sesjon/holdsesjon", {method: "POST"});
-
             if (response.status < 300) {
                 const data = await response.json();
-                return data && data.levetid !== undefined ? data.levetid : 4;
+                return data && data.levetid !== undefined ? data.levetid : -1;
             } else {
                 console.error("Klarte ikke holde sesjon: ", response.text());
-                return 5;
+                return -1;
             }
         }
 
@@ -49,11 +48,15 @@ actions=[{"text": "Logg ut", "href":"/sesjon/loggut"}] events="true">
             let ventISekund = 30
             while (true) {
                 await timeout(ventISekund)
-                ventISekund = await holdSesjon()
+                const nyVentetid = await holdSesjon()
+                if (nyVentetid > 0) {
+                    ventISekund = nyVentetid
+                } else {
+                    break; // Refresh feilet, avslutt
+                }
             }
         }
 
         holdSesjonILive()
-
     </script>
 </@main.page>

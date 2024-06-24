@@ -3,6 +3,9 @@ package no.helse.kj.devepj.pages
 import io.javalin.Javalin
 import io.javalin.http.Context
 import io.javalin.http.sse.SseClient
+import no.helse.kj.devepj.dto.getUserPidFromContext
+import no.helse.kj.devepj.helseid.HelseIdClient
+import no.helse.kj.devepj.kjinnlogging.KjernejournalConfiguration
 import no.helse.kj.devepj.logging.getEventStorefromContext
 
 object Events {
@@ -15,7 +18,9 @@ object Events {
 
     context.render(
       "/templates/events.ftl", mapOf(
-        Pair("virksomhet", context.sessionAttribute<Any>("klient").toString()),
+        Pair("bruker", getUserPidFromContext(context).getOrNull() ?: "Ukjent"),
+        Pair("miljo", KjernejournalConfiguration.fromContext(context).getOrNull()?.name ?: "Ukjent"),
+        Pair("virksomhet", HelseIdClient.fromContext(context).getOrNull()?.name ?: "Ukjent"),
       )
     )
   }

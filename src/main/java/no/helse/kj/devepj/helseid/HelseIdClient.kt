@@ -7,11 +7,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.nimbusds.jose.jwk.JWK
 import io.javalin.http.Context
-import java.nio.file.Paths
 import mu.KotlinLogging
 import no.helse.kj.devepj.pages.EpjError
 import no.helse.kj.devepj.util.YAML_MAPPER
 import no.helse.kj.devepj.util.readFiles
+import java.nio.file.Paths
 
 private val log = KotlinLogging.logger {}
 
@@ -37,7 +37,6 @@ data class HelseIdClient(
         .toList()
       this.HELSEID_CLIENT_MAP = mapOf(*pairs.toTypedArray())
     }
-
 
     private fun readClient(content: String): HelseIdClient {
       val rawClient = YAML_MAPPER.readValue(content, RawHelseIdClient::class.java)
@@ -71,7 +70,6 @@ data class HelseIdClient(
     }
 
     fun toFrontend(): List<Map<String, String>> {
-      log.info { HELSEID_CLIENT_MAP }
       return HELSEID_CLIENT_MAP.entries
         .map { klient ->
           mapOf(
